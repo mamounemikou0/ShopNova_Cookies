@@ -1,0 +1,576 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+  <meta charset="UTF-8"/>
+  <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+  <title>ShopNova — Tableau de bord surveillance</title>
+  <style>
+    :root{
+      --bg:#060609;--surface:#0e0e1a;--surface2:#14142a;--surface3:#1c1c38;
+      --border:#242448;--accent:#ff6b35;--accent2:#7c3aed;
+      --green:#10b981;--red:#ef4444;--yellow:#f59e0b;--blue:#3b82f6;
+      --text:#e8e8f4;--muted:#50507a;--muted2:#8080aa;
+      --font-d:'Georgia','Times New Roman',serif;--font-b:-apple-system,BlinkMacSystemFont,'Segoe UI',sans-serif;--font-m:'SF Mono','Fira Code','Consolas',monospace;
+    }
+    *{margin:0;padding:0;box-sizing:border-box;}
+    body{font-family:var(--font-b);background:var(--bg);color:var(--text);min-height:100vh;}
+
+    /* HEADER */
+    header{display:flex;align-items:center;justify-content:space-between;
+      padding:14px 24px;background:var(--surface);border-bottom:1px solid var(--border);
+      position:sticky;top:0;z-index:100;flex-wrap:wrap;gap:10px;}
+    .logo{font-family:var(--font-d);font-size:20px;font-weight:900;
+      background:linear-gradient(135deg,var(--accent),var(--accent2));
+      -webkit-background-clip:text;-webkit-text-fill-color:transparent;}
+    .htitle{font-size:12px;color:var(--muted2);margin-left:12px;}
+    .hleft{display:flex;align-items:center;}
+    .hright{display:flex;gap:8px;align-items:center;flex-wrap:wrap;}
+    .badge-live{display:flex;align-items:center;gap:6px;padding:5px 10px;border-radius:100px;
+      background:rgba(16,185,129,.1);border:1px solid rgba(16,185,129,.3);font-size:11px;font-weight:700;color:var(--green);}
+    .dot-live{width:6px;height:6px;border-radius:50%;background:var(--green);animation:bl 1.2s infinite;}
+    @keyframes bl{0%,100%{opacity:1}50%{opacity:.3}}
+    .hbtn{padding:6px 14px;border-radius:8px;font-size:11px;font-weight:700;cursor:pointer;
+      font-family:var(--font-b);text-decoration:none;display:inline-flex;align-items:center;gap:5px;transition:all .2s;border:none;white-space:nowrap;}
+    .hbtn.red{background:rgba(239,68,68,.1);border:1px solid rgba(239,68,68,.3);color:var(--red);}
+    .hbtn.red:hover{background:rgba(239,68,68,.2);}
+    .hbtn.purple{background:linear-gradient(135deg,var(--accent2),#9d5cf6);color:#fff;}
+    .hbtn.purple:hover{transform:translateY(-1px);box-shadow:0 6px 20px rgba(124,58,237,.4);}
+    .hbtn.ghost{background:var(--surface2);border:1px solid var(--border);color:var(--text);}
+
+    /* LAYOUT */
+    .layout{display:grid;grid-template-columns:280px 1fr;min-height:calc(100vh - 55px);align-items:start;}
+    .sidebar{background:var(--surface);border-right:1px solid var(--border);padding:16px;
+      position:sticky;top:55px;max-height:calc(100vh - 55px);overflow-y:auto;}
+    .main{padding:20px;display:flex;flex-direction:column;gap:18px;}
+    @media(max-width:1100px){
+      .layout{grid-template-columns:1fr;}
+      .sidebar{position:static;max-height:none;border-right:none;border-bottom:1px solid var(--border);}
+    }
+
+    /* SIDEBAR SECTIONS */
+    .sb-section{margin-bottom:24px;}
+    .sb-title{font-size:10px;font-weight:700;color:var(--muted);text-transform:uppercase;
+      letter-spacing:.1em;margin-bottom:10px;display:flex;align-items:center;gap:6px;}
+    .sb-badge{background:var(--surface3);padding:1px 7px;border-radius:100px;font-size:10px;}
+
+    /* Consent card */
+    .consent-card{background:var(--surface2);border:1px solid var(--border);border-radius:12px;padding:14px;}
+    .consent-row{display:flex;align-items:center;gap:10px;margin-bottom:10px;}
+    .c-dot{width:10px;height:10px;border-radius:50%;flex-shrink:0;}
+    .c-dot.all{background:var(--green);box-shadow:0 0 8px rgba(16,185,129,.6);}
+    .c-dot.essential{background:var(--yellow);box-shadow:0 0 8px rgba(245,158,11,.6);}
+    .c-dot.refused{background:var(--red);box-shadow:0 0 8px rgba(239,68,68,.6);}
+    .c-dot.none{background:var(--muted);}
+    .c-icon{font-size:24px;}
+    .c-label{font-size:14px;font-weight:700;}
+    .c-ts{font-size:11px;color:var(--muted2);}
+    .c-tags{display:flex;flex-wrap:wrap;gap:4px;margin-top:8px;}
+    .c-tag{padding:2px 9px;border-radius:100px;background:var(--surface3);font-size:10px;font-weight:700;color:var(--muted2);}
+
+    /* Cookie list */
+    .ck-item{background:var(--surface2);border-radius:8px;padding:9px 11px;
+      border-left:3px solid var(--border);margin-bottom:6px;}
+    .ck-item.essential{border-left-color:var(--yellow);}
+    .ck-item.tracking{border-left-color:var(--accent2);}
+    .ck-item.analytics{border-left-color:var(--blue);}
+    .ck-item.refused-c{border-left-color:var(--red);}
+    .ck-name{font-family:var(--font-m);font-size:10px;font-weight:500;color:var(--accent);margin-bottom:2px;word-break:break-all;}
+    .ck-val{color:var(--muted2);font-size:10px;word-break:break-all;font-family:var(--font-m);}
+    .ck-purpose{font-size:10px;color:var(--muted);margin-top:3px;}
+
+    /* Profile rows */
+    .pr-row{display:flex;justify-content:space-between;padding:5px 0;border-bottom:1px solid var(--border);font-size:11px;}
+    .pr-row:last-child{border-bottom:none;}
+    .pr-k{color:var(--muted2);}
+    .pr-v{font-family:var(--font-m);font-size:10px;color:var(--text);text-align:right;max-width:150px;word-break:break-all;}
+
+    /* STATS GRID */
+    .stats-grid{display:grid;grid-template-columns:repeat(4,1fr);gap:14px;}
+    @media(max-width:1200px){.stats-grid{grid-template-columns:repeat(2,1fr);}}
+    .stat-card{background:var(--surface);border:1px solid var(--border);border-radius:14px;padding:16px;
+      position:relative;overflow:hidden;transition:border-color .3s;}
+    .stat-card:hover{border-color:var(--accent2);}
+    .stat-card::before{content:'';position:absolute;top:0;left:0;right:0;height:3px;}
+    .stat-card.c1::before{background:linear-gradient(90deg,var(--yellow),var(--accent));}
+    .stat-card.c2::before{background:linear-gradient(90deg,var(--accent2),var(--blue));}
+    .stat-card.c3::before{background:linear-gradient(90deg,var(--green),var(--blue));}
+    .stat-card.c4::before{background:linear-gradient(90deg,var(--red),var(--accent));}
+    .stat-icon{font-size:20px;margin-bottom:6px;}
+    .stat-val{font-family:var(--font-m);font-size:28px;font-weight:500;line-height:1;margin-bottom:4px;}
+    .stat-lbl{font-size:11px;color:var(--muted2);font-weight:500;}
+    .risk-wrap{background:var(--surface2);border-radius:6px;height:6px;overflow:hidden;margin-top:8px;}
+    .risk-fill{height:100%;border-radius:6px;transition:width .8s ease;}
+    .risk-scale{display:flex;justify-content:space-between;font-size:9px;color:var(--muted);margin-top:3px;}
+
+    /* PANEL */
+    .panel{background:var(--surface);border:1px solid var(--border);border-radius:14px;overflow:hidden;}
+    .panel-hdr{padding:12px 20px;background:var(--surface2);border-bottom:1px solid var(--border);
+      display:flex;align-items:center;justify-content:space-between;flex-wrap:wrap;gap:10px;}
+    .panel-title{font-size:13px;font-weight:700;display:flex;align-items:center;gap:8px;white-space:nowrap;}
+    .panel-body{overflow-y:auto;}
+
+    /* LOG TABLE */
+    .log-row{display:grid;grid-template-columns:140px 100px 1fr;
+      padding:9px 22px;border-bottom:1px solid rgba(36,36,72,.6);
+      font-size:11px;align-items:start;gap:12px;transition:background .15s;cursor:default;}
+    .log-row:hover{background:var(--surface2);}
+    .log-row:last-child{border-bottom:none;}
+    .log-ts{font-family:var(--font-m);color:var(--muted2);font-size:10px;line-height:1.7;}
+    .log-badge{display:inline-flex;align-items:center;gap:3px;padding:2px 8px;border-radius:100px;
+      font-size:9px;font-weight:700;text-transform:uppercase;letter-spacing:.05em;}
+    .log-badge.cookie{background:rgba(245,158,11,.15);color:var(--yellow);}
+    .log-badge.track{background:rgba(124,58,237,.15);color:#a78bfa;}
+    .log-badge.action{background:rgba(16,185,129,.15);color:var(--green);}
+    .log-badge.fingerprint{background:rgba(239,68,68,.15);color:var(--red);}
+    .log-badge.pixel{background:rgba(59,130,246,.15);color:var(--blue);}
+    .log-badge.privacy{background:rgba(16,185,129,.15);color:var(--green);}
+    .log-badge.session{background:rgba(255,107,53,.15);color:var(--accent);}
+    .log-badge.behavior{background:rgba(168,85,247,.15);color:#c084fc;}
+    .log-badge.analytics{background:rgba(59,130,246,.15);color:var(--blue);}
+    .log-badge.performance{background:rgba(107,114,128,.15);color:var(--muted2);}
+    .log-msg{color:var(--text);line-height:1.5;}
+    .log-data{font-family:var(--font-m);font-size:9px;color:var(--muted2);margin-top:3px;line-height:1.7;word-break:break-all;}
+
+    /* PIXEL LOG */
+    .pixel-row{padding:10px 22px;border-bottom:1px solid rgba(36,36,72,.6);font-size:11px;font-family:var(--font-m);}
+    .pixel-row:last-child{border-bottom:none;}
+    .pixel-event{color:var(--blue);font-weight:500;margin-bottom:4px;}
+    .pixel-fields{display:grid;grid-template-columns:repeat(2,1fr);gap:2px;}
+    .pixel-field{display:flex;gap:6px;}
+    .pixel-key{color:var(--muted);}
+    .pixel-val{color:var(--muted2);word-break:break-all;}
+
+    /* VISIT HISTORY */
+    .visit-row{display:flex;align-items:center;gap:14px;padding:10px 22px;
+      border-bottom:1px solid rgba(36,36,72,.6);font-size:11px;}
+    .visit-row:last-child{border-bottom:none;}
+    .visit-num{font-family:var(--font-m);font-size:10px;color:var(--muted);width:20px;}
+    .visit-badge{padding:2px 8px;border-radius:6px;font-size:9px;font-weight:700;}
+    .visit-badge.all{background:rgba(16,185,129,.15);color:var(--green);}
+    .visit-badge.essential{background:rgba(245,158,11,.15);color:var(--yellow);}
+    .visit-badge.refused{background:rgba(239,68,68,.15);color:var(--red);}
+    .visit-badge.none{background:rgba(107,114,128,.15);color:var(--muted2);}
+    .visit-ts{color:var(--muted2);font-family:var(--font-m);font-size:10px;margin-left:auto;}
+    .visit-sess{color:var(--muted);font-size:10px;font-family:var(--font-m);max-width:140px;overflow:hidden;text-overflow:ellipsis;}
+
+    /* FILTER BAR */
+    .filter-bar{display:flex;gap:6px;flex-wrap:wrap;}
+    .fbtn{padding:4px 11px;border-radius:100px;font-size:10px;font-weight:700;
+      background:var(--surface2);border:1px solid var(--border);color:var(--muted2);
+      cursor:pointer;font-family:var(--font-b);transition:all .2s;}
+    .fbtn.active{background:var(--accent2);border-color:var(--accent2);color:#fff;}
+    .fbtn:hover:not(.active){border-color:var(--accent2);color:var(--text);}
+
+    /* EMPTY */
+    .empty{text-align:center;padding:50px 24px;color:var(--muted);}
+    .empty h3{font-size:16px;margin-bottom:6px;}
+    .empty p{font-size:13px;}
+
+    /* IMPLICATIONS */
+    .impl-grid{display:grid;grid-template-columns:1fr 1fr;gap:14px;padding:20px;}
+    @media(max-width:900px){.impl-grid{grid-template-columns:1fr;}}
+    .impl-box{background:var(--surface2);border-radius:10px;padding:14px;}
+    .impl-box h4{font-size:12px;font-weight:700;margin-bottom:10px;}
+    .impl-box ul{list-style:none;font-size:11px;line-height:2;color:var(--muted2);}
+
+    /* PRIVACY SOLUTION */
+    .privacy-panel{padding:20px;display:grid;grid-template-columns:1fr 1fr;gap:16px;}
+    @media(max-width:900px){.privacy-panel{grid-template-columns:1fr;}}
+    .priv-box{background:var(--surface2);border-radius:10px;padding:14px;border:1px solid var(--border);}
+    .priv-box h4{font-size:12px;font-weight:700;margin-bottom:8px;}
+    .priv-box p{font-size:11px;color:var(--muted2);line-height:1.7;}
+    .priv-box.good{border-color:rgba(16,185,129,.3);}
+    .priv-box.bad{border-color:rgba(239,68,68,.3);}
+
+    ::-webkit-scrollbar{width:5px;height:5px;}
+    ::-webkit-scrollbar-track{background:var(--surface2);}
+    ::-webkit-scrollbar-thumb{background:var(--border);border-radius:3px;}
+    ::-webkit-scrollbar-thumb:hover{background:var(--muted);}
+
+    /* Scroll indicator on panels */
+    .panel-body{position:relative;}
+    .scroll-hint{
+      display:none;position:absolute;bottom:0;left:0;right:0;
+      padding:6px;text-align:center;font-size:10px;color:var(--muted2);
+      background:linear-gradient(to bottom,transparent,var(--surface));
+      pointer-events:none;
+    }
+    .panel-body.has-scroll .scroll-hint{display:block;}
+  </style>
+</head>
+<body>
+
+<header>
+  <div class="hleft">
+    <div class="logo">ShopNova</div>
+    <div class="htitle">/ Tableau de bord de surveillance</div>
+  </div>
+  <div class="hright">
+    <div class="badge-live"><span class="dot-live"></span>Données locales uniquement</div>
+    <a class="hbtn purple" href="compare.html" target="_blank">⚖ Avant / Après</a>
+    <button class="hbtn red" onclick="doClear()">🗑 Effacer tout</button>
+    <a class="hbtn ghost" href="index.html">← Retour au site</a>
+  </div>
+</header>
+
+<div class="layout">
+
+  <!-- SIDEBAR -->
+  <div class="sidebar">
+
+    <div class="sb-section">
+      <div class="sb-title">🎯 Statut consentement</div>
+      <div class="consent-card" id="sb-consent">
+        <div class="consent-row">
+          <span class="c-dot none" id="c-dot"></span>
+          <span class="c-icon" id="c-icon">❓</span>
+          <div>
+            <div class="c-label" id="c-label">Aucun choix</div>
+            <div class="c-ts" id="c-ts">—</div>
+          </div>
+        </div>
+        <div class="c-tags" id="c-tags"></div>
+      </div>
+    </div>
+
+    <div class="sb-section">
+      <div class="sb-title">🍪 Cookies actifs <span class="sb-badge" id="ck-count">0</span></div>
+      <div id="ck-list"><p style="font-size:11px;color:var(--muted);">Aucun cookie</p></div>
+    </div>
+
+    <div class="sb-section">
+      <div class="sb-title">🔍 Empreinte navigateur</div>
+      <div id="fp-panel"><p style="font-size:11px;color:var(--muted);">Non collectée</p></div>
+    </div>
+
+    <div class="sb-section">
+      <div class="sb-title">📈 Profil utilisateur</div>
+      <div id="profile-panel"><p style="font-size:11px;color:var(--muted);">Non créé</p></div>
+    </div>
+
+  </div>
+
+  <!-- MAIN -->
+  <div class="main">
+
+    <!-- STATS -->
+    <div class="stats-grid">
+      <div class="stat-card c1">
+        <div class="stat-icon">🍪</div>
+        <div class="stat-val" id="s-cookies">0</div>
+        <div class="stat-lbl">Cookies créés</div>
+      </div>
+      <div class="stat-card c2">
+        <div class="stat-icon">📡</div>
+        <div class="stat-val" id="s-pixels">0</div>
+        <div class="stat-lbl">Pixels déclenchés</div>
+      </div>
+      <div class="stat-card c3">
+        <div class="stat-icon">⚡</div>
+        <div class="stat-val" id="s-events">0</div>
+        <div class="stat-lbl">Événements totaux</div>
+      </div>
+      <div class="stat-card c4">
+        <div class="stat-icon">⚠️</div>
+        <div class="stat-val" id="s-risk" style="font-size:20px;margin-top:6px;">—</div>
+        <div class="stat-lbl">Niveau de risque</div>
+        <div class="risk-wrap"><div class="risk-fill" id="risk-fill" style="width:0%"></div></div>
+        <div class="risk-scale"><span>Faible</span><span>Élevé</span></div>
+      </div>
+    </div>
+
+    <!-- EVENT LOG -->
+    <div class="panel">
+      <div class="panel-hdr">
+        <div class="panel-title">📋 Journal complet des événements</div>
+        <div class="filter-bar">
+          <button class="fbtn active" onclick="setFilter('all',this)">Tous</button>
+          <button class="fbtn" onclick="setFilter('cookie',this)">🍪 Cookies</button>
+          <button class="fbtn" onclick="setFilter('track',this)">📡 Tracking</button>
+          <button class="fbtn" onclick="setFilter('action',this)">⚡ Actions</button>
+          <button class="fbtn" onclick="setFilter('fingerprint',this)">🔍 Empreinte</button>
+          <button class="fbtn" onclick="setFilter('pixel',this)">📡 Pixels</button>
+          <button class="fbtn" onclick="setFilter('privacy',this)">🛡 Vie privée</button>
+        </div>
+      </div>
+      <div class="panel-body" id="log-table" style="max-height:340px;overflow-y:auto;">
+        <div class="empty"><h3>Aucun événement</h3><p>Visitez le site et interagissez avec la bannière cookies.</p></div>
+      </div>
+    </div>
+
+    <!-- PIXEL LOG -->
+    <div class="panel">
+      <div class="panel-hdr">
+        <div class="panel-title">📡 Journal des pixels de suivi (1×1px)</div>
+        <span style="font-size:11px;color:var(--muted2);">Données qui seraient envoyées au serveur de tracking</span>
+      </div>
+      <div class="panel-body" id="pixel-table" style="max-height:260px;overflow-y:auto;">
+        <div class="empty"><h3>Aucun pixel déclenché</h3><p>Acceptez tous les cookies pour voir les pixels se déclencher.</p></div>
+      </div>
+    </div>
+
+    <!-- VISIT HISTORY -->
+    <div class="panel">
+      <div class="panel-hdr">
+        <div class="panel-title">🔁 Historique des visites (persistance inter-sessions)</div>
+        <span style="font-size:11px;color:var(--muted2);">Prouve que le cookie user_id reconnaît l'utilisateur à chaque retour</span>
+      </div>
+      <div class="panel-body" id="visit-table" style="max-height:220px;overflow-y:auto;">
+        <div class="empty"><h3>Aucune visite enregistrée</h3><p>Visitez le site avec "Tout accepter", fermez l'onglet, puis revenez.</p></div>
+      </div>
+    </div>
+
+    <!-- IMPLICATIONS -->
+    <div class="panel">
+      <div class="panel-hdr">
+        <div class="panel-title">⚠️ Implications — Ce que ces données permettraient</div>
+      </div>
+      <div class="impl-grid">
+        <div class="impl-box" style="border-left:3px solid var(--red);">
+          <h4 style="color:var(--red);">🎯 Avec "Tout accepter"</h4>
+          <ul>
+            <li>• Profilage comportemental complet</li>
+            <li>• Ré-identification sur 2 ans (cookie persistant)</li>
+            <li>• Manipulation des prix via groupe A/B</li>
+            <li>• Estimation du pouvoir d'achat (panier)</li>
+            <li>• Corrélation des sessions dans le temps</li>
+            <li>• Partage possible avec des tiers (vrai site)</li>
+            <li>• Empreinte navigateur = fingerprinting</li>
+          </ul>
+        </div>
+        <div class="impl-box" style="border-left:3px solid var(--green);">
+          <h4 style="color:var(--green);">🛡 Avec "Refuser"</h4>
+          <ul>
+            <li>• Aucune ré-identification possible</li>
+            <li>• Session anonyme, oubliée à fermeture</li>
+            <li>• Zéro profilage comportemental</li>
+            <li>• Aucun pixel de tracking déclenché</li>
+            <li>• Pas d'empreinte navigateur collectée</li>
+            <li>• Conforme RGPD / Loi 25 Québec</li>
+            <li>• Publicités non-ciblées seulement</li>
+          </ul>
+        </div>
+      </div>
+    </div>
+
+    <!-- ATTENUATION (correction proposée) -->
+    <!-- <div class="panel">
+      <div class="panel-hdr">
+        <div class="panel-title">🛡 Correction proposée — Mode Vie Privée</div>
+      </div>
+      <div class="privacy-panel">
+        <div class="priv-box bad">
+          <h4 style="color:var(--red);">❌ Problème : Dark patterns</h4>
+          <p>La plupart des sites utilisent des <strong>dark patterns</strong> : le bouton "Accepter" est mis en évidence (vert, grand), tandis que "Refuser" est caché ou nécessite plusieurs clics. C'est une manipulation du consentement.</p>
+        </div>
+        <div class="priv-box good">
+          <h4 style="color:var(--green);">✅ Solution : Consentement équitable</h4>
+          <p>Les 3 choix sont présentés avec la <strong>même visibilité</strong>. De plus, un <strong>Mode Vie Privée</strong> est proposé dans l'interface : il désactive activement tout tracking et supprime les cookies existants, même après avoir accepté.</p>
+        </div>
+        <div class="priv-box good" style="grid-column:1/-1;">
+          <h4 style="color:var(--green);">🔧 Autres atténuations techniques</h4>
+          <p>
+            <strong>Pour les utilisateurs :</strong> Navigation privée (supprime les cookies), extensions uBlock Origin / Privacy Badger, effacer les cookies régulièrement, toujours choisir "Refuser" ou "Essentiels".<br><br>
+            <strong>Pour les développeurs :</strong> Respecter la Loi 25 (Québec) et le RGPD — collecter le strict minimum, limiter la durée de vie des cookies, ne jamais créer de cookies tiers sans consentement explicite, fournir un bouton "Refuser" aussi accessible que "Accepter".<br><br>
+            <strong>Réglementaire :</strong> En vertu de la Loi 25, le consentement doit être libre, éclairé, spécifique et non équivoque. Les cases pré-cochées sont illégales depuis 2020 (CJUE).
+          </p>
+        </div>
+      </div>
+    </div> -->
+
+  </div>
+</div>
+
+<script src="engine.js"></script>
+<script>
+let currentFilter = 'all';
+
+const COOKIE_META = {
+  shopnova_session_id:  {purpose:'Session courante (1 jour)', type:'essential'},
+  shopnova_consent:     {purpose:'Mémorisation du choix de consentement', type:'essential'},
+  shopnova_lang:        {purpose:'Langue préférée (1 an)', type:'essential'},
+  shopnova_user_id:     {purpose:'⚠ Identifiant persistant (2 ANS) — ré-identification', type:'tracking'},
+  shopnova_ab_group:    {purpose:'⚠ Groupe A/B — manipulation prix/affichage', type:'analytics'},
+  shopnova_first_visit: {purpose:'⚠ Horodatage première visite (2 ans)', type:'analytics'},
+  shopnova_src:         {purpose:'⚠ Source d\'acquisition marketing', type:'tracking'},
+};
+
+function renderSidebar() {
+  // Consent
+  const consent = ENGINE.getConsent();
+  const dot = document.getElementById('c-dot');
+  const icon = document.getElementById('c-icon');
+  const label = document.getElementById('c-label');
+  const ts = document.getElementById('c-ts');
+  const tags = document.getElementById('c-tags');
+
+  if (!consent) {
+    dot.className='c-dot none'; icon.textContent='❓';
+    label.textContent='Aucun choix'; label.style.color=''; ts.textContent='—'; tags.innerHTML='';
+  } else {
+    const cfg = {
+      all:      {dot:'all', icon:'✅', label:'Tout accepté', color:'var(--green)', badges:['Analytics','Marketing','Empreinte','Pixel','Comportement']},
+      essential:{dot:'essential', icon:'⚠️', label:'Essentiels seulement', color:'var(--yellow)', badges:['Session','Langue']},
+      refused:  {dot:'refused', icon:'🛡', label:'Tout refusé', color:'var(--red)', badges:['Refus mémorisé']},
+    }[consent.choice];
+    dot.className='c-dot '+cfg.dot;
+    icon.textContent=cfg.icon;
+    label.textContent=cfg.label; label.style.color=cfg.color;
+    ts.textContent=new Date(consent.timestamp).toLocaleString('fr-CA',{hour12:false});
+    tags.innerHTML=cfg.badges.map(b=>`<span class="c-tag">${b}</span>`).join('');
+  }
+
+  // Cookies
+  const cookies = ENGINE.getAllShopCookies();
+  document.getElementById('ck-count').textContent=cookies.length;
+  const ckList=document.getElementById('ck-list');
+  if (!cookies.length) {
+    ckList.innerHTML='<p style="font-size:11px;color:var(--muted);">Aucun cookie ShopNova</p>';
+  } else {
+    ckList.innerHTML=cookies.map(c=>{
+      const m=COOKIE_META[c.name]||{purpose:'Usage interne',type:'essential'};
+      return `<div class="ck-item ${m.type}">
+        <div class="ck-name">${c.name}</div>
+        <div class="ck-val">${c.value.substring(0,55)}${c.value.length>55?'…':''}</div>
+        <div class="ck-purpose">${m.purpose}</div>
+      </div>`;
+    }).join('');
+  }
+
+  // Fingerprint
+  const fp=ENGINE.getFingerprint();
+  const fpPanel=document.getElementById('fp-panel');
+  if (!fp) {
+    fpPanel.innerHTML='<p style="font-size:11px;color:var(--muted);">Non collectée (nécessite "Tout accepter")</p>';
+  } else {
+    const fields=[['Langue',fp.language],['Fuseau',fp.timezone],['Résolution',fp.screenRes],
+      ['Fenêtre',fp.windowSize],['Couleurs',fp.colorDepth],['Plateforme',fp.platform],
+      ['Cœurs CPU',fp.cores],['RAM',fp.memory],['DNT',fp.doNotTrack]];
+    fpPanel.innerHTML=`
+      <div style="background:rgba(239,68,68,.07);border:1px solid rgba(239,68,68,.2);border-radius:8px;padding:9px;margin-bottom:8px;">
+        <div style="font-size:10px;color:var(--red);font-weight:700;margin-bottom:3px;">⚠ EMPREINTE COLLECTÉE</div>
+        <div style="font-size:10px;color:var(--muted2);">Ces données combinées identifient votre navigateur parmi des millions.</div>
+      </div>
+      ${fields.map(([k,v])=>`<div class="pr-row"><span class="pr-k">${k}</span><span class="pr-v">${v}</span></div>`).join('')}`;
+  }
+
+  // Profile
+  const profile=ENGINE.getProfile();
+  const pp=document.getElementById('profile-panel');
+  if (!profile) {
+    pp.innerHTML='<p style="font-size:11px;color:var(--muted);">Non créé</p>';
+  } else {
+    pp.innerHTML=`
+      ${profile.viewedProducts?.length?`
+        <div style="margin-bottom:8px;">
+          <div style="font-size:10px;color:var(--muted2);margin-bottom:5px;">Produits consultés :</div>
+          ${profile.viewedProducts.map(p=>`<span style="display:inline-block;padding:2px 7px;background:rgba(124,58,237,.1);border-radius:4px;font-size:10px;color:#a78bfa;margin:2px;">${p}</span>`).join('')}
+        </div>`:''}
+      ${profile.cartItems?.length?`
+        <div style="margin-bottom:6px;">
+          <div style="font-size:10px;color:var(--muted2);margin-bottom:4px;">Panier :</div>
+          ${profile.cartItems.map(i=>`<div style="font-size:10px;color:var(--accent);">${i.name} — ${i.price}$</div>`).join('')}
+          <div style="font-size:11px;font-weight:700;color:var(--text);margin-top:4px;">Budget estimé : ${profile.estimatedBudget}$</div>
+        </div>`:''}
+      ${profile.lastActivity?`<div class="pr-row"><span class="pr-k">Dernière activité</span><span class="pr-v">${new Date(profile.lastActivity).toLocaleTimeString('fr-CA',{hour12:false})}</span></div>`:''}`;
+  }
+}
+
+function renderStats() {
+  const logs=ENGINE.getLogs();
+  document.getElementById('s-cookies').textContent=logs.filter(l=>l.type==='cookie_set').length;
+  document.getElementById('s-pixels').textContent=logs.filter(l=>l.type==='pixel').length;
+  document.getElementById('s-events').textContent=logs.length;
+
+  const risk=ENGINE.getRiskScore();
+  const riskEl=document.getElementById('s-risk');
+  riskEl.textContent=risk.label; riskEl.style.color=risk.color;
+  const fill=document.getElementById('risk-fill');
+  fill.style.width=risk.pct+'%';
+  fill.style.background=risk.pct>60?'linear-gradient(90deg,var(--yellow),var(--red))':
+    risk.pct>20?'linear-gradient(90deg,var(--green),var(--yellow))':'var(--green)';
+}
+
+function renderLogTable() {
+  const logs=ENGINE.getLogs();
+  const filtered=currentFilter==='all'?logs:logs.filter(l=>l.category===currentFilter||l.type===currentFilter);
+  const table=document.getElementById('log-table');
+  if (!filtered.length) {
+    table.innerHTML='<div class="empty"><h3>Aucun événement</h3><p>Visitez le site pour commencer.</p></div>';
+    return;
+  }
+  table.innerHTML=filtered.map(l=>{
+    const skip=['userAgent','page'];
+    const dataStr=Object.entries(l.data||{}).filter(([k])=>!skip.includes(k))
+      .map(([k,v])=>`${k}: ${String(v).substring(0,100)}`).join(' · ');
+    return `<div class="log-row">
+      <div class="log-ts">${new Date(l.timestamp).toLocaleDateString('fr-CA')}<br>${new Date(l.timestamp).toLocaleTimeString('fr-CA',{hour12:false})}</div>
+      <div>
+        <span class="log-badge ${l.category}">${l.category}</span><br>
+        <span style="font-size:9px;color:var(--muted);font-family:var(--font-m);">${l.type}</span>
+      </div>
+      <div class="log-msg">${l.message}${dataStr?`<div class="log-data">${dataStr}</div>`:''}</div>
+    </div>`;
+  }).join('');
+}
+
+function renderPixelTable() {
+  const pixels=ENGINE.getPixelLogs();
+  const table=document.getElementById('pixel-table');
+  if (!pixels.length) {
+    table.innerHTML='<div class="empty"><h3>Aucun pixel</h3><p>Acceptez tous les cookies pour déclencher les pixels.</p></div>';
+    return;
+  }
+  table.innerHTML=pixels.map(p=>`
+    <div class="pixel-row">
+      <div class="pixel-event">▸ EVENT: ${p.event} — ${new Date(p.timestamp).toLocaleString('fr-CA',{hour12:false})}</div>
+      <div class="pixel-fields">
+        ${Object.entries(p).filter(([k])=>!['event','timestamp'].includes(k)).map(([k,v])=>`
+          <div class="pixel-field"><span class="pixel-key">${k}:</span><span class="pixel-val">${String(v).substring(0,40)}</span></div>
+        `).join('')}
+      </div>
+    </div>`).join('');
+}
+
+function renderVisitHistory() {
+  const history=ENGINE.getVisitHistory();
+  const table=document.getElementById('visit-table');
+  if (!history.length) {
+    table.innerHTML='<div class="empty"><h3>Aucune visite</h3><p>Visitez le site, revenez plusieurs fois pour voir la persistance.</p></div>';
+    return;
+  }
+  table.innerHTML=history.map((v,i)=>`
+    <div class="visit-row">
+      <span class="visit-num">#${history.length-i}</span>
+      <span class="visit-badge ${v.consent||'none'}">${v.consent||'aucun'}</span>
+      <span class="visit-sess">${v.sessionId}</span>
+      <span class="visit-ts">${new Date(v.timestamp).toLocaleString('fr-CA',{hour12:false})}</span>
+    </div>`).join('');
+}
+
+function setFilter(f, btn) {
+  currentFilter=f;
+  document.querySelectorAll('.fbtn').forEach(b=>b.classList.remove('active'));
+  btn.classList.add('active');
+  renderLogTable();
+}
+
+function doClear() {
+  if (!confirm('Effacer tous les logs, cookies et données ? Cela réinitialise complètement la démonstration.')) return;
+  ENGINE.clearAll();
+  renderAll();
+}
+
+function renderAll() {
+  renderSidebar();
+  renderStats();
+  renderLogTable();
+  renderPixelTable();
+  renderVisitHistory();
+}
+
+renderAll();
+setInterval(renderAll, 2500);
+</script>
+</body>
+</html>

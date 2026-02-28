@@ -1,0 +1,516 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+  <meta charset="UTF-8"/>
+  <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+  <title>ShopNova — Boutique en ligne</title>
+  <style>
+    :root {
+      --bg:#0a0a0f; --surface:#12121c; --surface2:#1a1a2e; --surface3:#22223a;
+      --border:#252545; --accent:#ff6b35; --accent2:#7c3aed;
+      --green:#10b981; --red:#ef4444; --yellow:#f59e0b; --blue:#3b82f6;
+      --text:#e8e8f4; --muted:#5a5a80; --muted2:#8888b0;
+      --font-d:'Georgia','Times New Roman',serif;--font-b:-apple-system,BlinkMacSystemFont,'Segoe UI',sans-serif;--font-m:'SF Mono','Fira Code','Consolas',monospace;
+    }
+    *{margin:0;padding:0;box-sizing:border-box;}
+    body{font-family:var(--font-b);background:var(--bg);color:var(--text);min-height:100vh;overflow-x:hidden;}
+
+    /* NAV */
+    nav{position:sticky;top:0;z-index:200;display:flex;align-items:center;justify-content:space-between;
+      padding:14px 48px;background:rgba(10,10,15,0.9);backdrop-filter:blur(20px);
+      border-bottom:1px solid var(--border);}
+    .logo{font-family:var(--font-d);font-size:26px;font-weight:900;
+      background:linear-gradient(135deg,var(--accent),var(--accent2));
+      -webkit-background-clip:text;-webkit-text-fill-color:transparent;}
+    .nav-links{display:flex;gap:28px;}
+    .nav-links a{color:var(--muted2);text-decoration:none;font-size:13px;font-weight:500;
+      letter-spacing:.06em;text-transform:uppercase;transition:color .2s;}
+    .nav-links a:hover{color:var(--text);}
+    .nav-right{display:flex;gap:10px;align-items:center;}
+    .nav-btn{padding:8px 18px;border-radius:8px;font-size:12px;font-weight:700;cursor:pointer;
+      font-family:var(--font-b);border:none;text-decoration:none;display:inline-flex;align-items:center;gap:6px;transition:all .2s;}
+    .nav-btn.dash{background:linear-gradient(135deg,var(--accent2),#9d5cf6);color:#fff;}
+    .nav-btn.dash:hover{transform:translateY(-1px);box-shadow:0 8px 24px rgba(124,58,237,.4);}
+    .nav-btn.compare{background:var(--surface2);color:var(--text);border:1px solid var(--border);}
+    .nav-btn.compare:hover{border-color:var(--accent);}
+
+    /* CONSENT STRIP */
+    #consent-strip{display:none;padding:10px 48px;font-size:13px;font-weight:600;
+      align-items:center;gap:14px;border-bottom:1px solid var(--border);}
+    #consent-strip.shown{display:flex;}
+    #consent-strip.all{background:rgba(16,185,129,.1);color:var(--green);}
+    #consent-strip.essential{background:rgba(245,158,11,.1);color:var(--yellow);}
+    #consent-strip.refused{background:rgba(239,68,68,.1);color:var(--red);}
+    #consent-strip a{margin-left:auto;font-size:12px;color:inherit;text-decoration:none;opacity:.8;}
+    #consent-strip a:hover{opacity:1;}
+
+    /* PIXEL RADAR — visible 1x1 pixel */
+    #pixel-radar{
+      position:fixed;top:80px;left:24px;z-index:300;
+      width:280px;background:var(--surface);border:1px solid var(--border);
+      border-radius:14px;overflow:hidden;box-shadow:0 16px 60px rgba(0,0,0,.5);
+      transform:translateX(-320px);transition:transform .4s cubic-bezier(.34,1.56,.64,1);
+    }
+    #pixel-radar.open{transform:translateX(0);}
+    .radar-header{padding:12px 16px;background:var(--surface2);border-bottom:1px solid var(--border);
+      display:flex;align-items:center;justify-content:space-between;}
+    .radar-title{font-size:12px;font-weight:700;display:flex;align-items:center;gap:6px;}
+    .radar-close{background:none;border:none;color:var(--muted);cursor:pointer;font-size:16px;}
+    .radar-pixel-area{
+      padding:12px 16px;display:flex;align-items:center;gap:10px;
+      border-bottom:1px solid var(--border);
+    }
+    .pixel-visual{
+      width:48px;height:48px;background:var(--surface3);border-radius:6px;
+      display:flex;align-items:center;justify-content:center;position:relative;overflow:hidden;
+    }
+    .pixel-dot{
+      width:1px;height:1px;background:#fff;
+      box-shadow:0 0 0 0 rgba(59,130,246,0);
+    }
+    .pixel-dot.firing{
+      animation:pixelFire .6s ease;
+    }
+    @keyframes pixelFire{
+      0%{box-shadow:0 0 0 0 rgba(59,130,246,.8);}
+      50%{box-shadow:0 0 0 20px rgba(59,130,246,.4);}
+      100%{box-shadow:0 0 0 40px rgba(59,130,246,0);}
+    }
+    .pixel-info{font-size:11px;color:var(--muted2);line-height:1.6;}
+    .pixel-info strong{color:var(--text);display:block;font-size:12px;}
+    .radar-log{padding:8px;max-height:160px;overflow-y:auto;}
+    .radar-entry{padding:6px 8px;border-radius:6px;font-size:10px;
+      font-family:var(--font-m);color:var(--muted2);margin-bottom:4px;
+      background:var(--surface3);animation:fadeIn .3s ease;}
+    .radar-entry .ev{color:var(--blue);}
+    .radar-entry .ts{color:var(--muted);float:right;}
+    @keyframes fadeIn{from{opacity:0;transform:translateY(4px)}to{opacity:1;transform:none}}
+
+    /* HERO */
+    .hero{padding:100px 48px 80px;display:grid;grid-template-columns:1fr 1fr;gap:60px;align-items:center;position:relative;}
+    .hero::after{content:'';position:absolute;top:-100px;right:-100px;width:500px;height:500px;
+      background:radial-gradient(circle,rgba(124,58,237,.12) 0%,transparent 70%);border-radius:50%;pointer-events:none;}
+    .hero-badge{display:inline-flex;align-items:center;gap:8px;padding:6px 16px;border-radius:100px;
+      background:rgba(255,107,53,.1);border:1px solid rgba(255,107,53,.3);
+      font-size:11px;font-weight:700;color:var(--accent);letter-spacing:.08em;text-transform:uppercase;margin-bottom:20px;}
+    .hero h1{font-family:var(--font-d);font-size:62px;line-height:1.05;font-weight:900;margin-bottom:20px;}
+    .hero h1 span{background:linear-gradient(135deg,var(--accent),var(--accent2));
+      -webkit-background-clip:text;-webkit-text-fill-color:transparent;}
+    .hero p{color:var(--muted2);font-size:17px;line-height:1.7;margin-bottom:36px;max-width:480px;}
+    .hero-btns{display:flex;gap:14px;}
+    .btn-primary{padding:13px 30px;border-radius:10px;font-size:14px;font-weight:700;
+      background:linear-gradient(135deg,var(--accent),#ff8c5a);color:#fff;cursor:pointer;border:none;
+      font-family:var(--font-b);transition:all .2s;}
+    .btn-primary:hover{transform:translateY(-2px);box-shadow:0 12px 32px rgba(255,107,53,.4);}
+    .btn-ghost{padding:13px 30px;border-radius:10px;font-size:14px;font-weight:700;
+      background:transparent;color:var(--text);cursor:pointer;border:1px solid var(--border);
+      font-family:var(--font-b);transition:border-color .2s;}
+    .btn-ghost:hover{border-color:var(--accent2);}
+
+    /* HERO VISUAL */
+    .hero-visual{background:var(--surface);border:1px solid var(--border);border-radius:20px;
+      overflow:hidden;padding:20px;display:grid;grid-template-columns:repeat(3,1fr);gap:10px;}
+    .mini-card{background:var(--surface2);border-radius:10px;padding:10px;border:1px solid var(--border);}
+    .mini-emoji{font-size:28px;margin-bottom:6px;}
+    .mini-name{font-size:10px;font-weight:700;color:var(--text);}
+    .mini-price{font-size:12px;color:var(--accent);font-weight:700;}
+
+    /* PRODUITS */
+    .section{padding:70px 48px;}
+    .section-header{margin-bottom:40px;}
+    .section-header h2{font-family:var(--font-d);font-size:38px;font-weight:700;margin-bottom:8px;}
+    .section-header p{color:var(--muted2);font-size:15px;}
+    .products-grid{display:grid;grid-template-columns:repeat(auto-fill,minmax(250px,1fr));gap:20px;}
+    .product-card{background:var(--surface);border:1px solid var(--border);border-radius:18px;
+      overflow:hidden;cursor:pointer;transition:all .3s;}
+    .product-card:hover{transform:translateY(-5px);border-color:rgba(124,58,237,.4);
+      box-shadow:0 20px 60px rgba(0,0,0,.4);}
+    .product-card .img-area{height:180px;background:var(--surface2);display:flex;
+      align-items:center;justify-content:center;font-size:64px;transition:transform .3s;}
+    .product-card:hover .img-area{transform:scale(1.06);}
+    .product-card .info{padding:18px;}
+    .cat{font-size:10px;font-weight:700;color:var(--accent2);text-transform:uppercase;letter-spacing:.1em;margin-bottom:6px;}
+    .pname{font-size:15px;font-weight:600;margin-bottom:4px;}
+    .pdesc{font-size:12px;color:var(--muted2);margin-bottom:14px;line-height:1.5;}
+    .pbottom{display:flex;align-items:center;justify-content:space-between;}
+    .pprice{font-size:20px;font-weight:700;color:var(--accent);}
+    .btn-add{padding:7px 18px;border-radius:7px;font-size:12px;font-weight:700;
+      background:var(--surface2);color:var(--text);border:1px solid var(--border);
+      cursor:pointer;font-family:var(--font-b);transition:all .2s;}
+    .btn-add:hover{background:var(--accent);border-color:var(--accent);color:#fff;}
+
+    /* FLUX D'ACTIVITÉ  */
+    #feed{position:fixed;bottom:20px;right:20px;z-index:300;width:340px;
+      background:var(--surface);border:1px solid var(--border);border-radius:18px;overflow:hidden;
+      box-shadow:0 20px 70px rgba(0,0,0,.6);
+      transform:translateY(calc(100% + 30px));transition:transform .4s cubic-bezier(.34,1.56,.64,1);}
+    #feed.open{transform:translateY(0);}
+    .feed-header{padding:12px 16px;background:var(--surface2);border-bottom:1px solid var(--border);
+      display:flex;align-items:center;justify-content:space-between;}
+    .feed-title{font-size:12px;font-weight:700;display:flex;align-items:center;gap:8px;}
+    .pulsedot{width:7px;height:7px;border-radius:50%;background:var(--green);animation:pd 1.4s infinite;}
+    @keyframes pd{0%,100%{opacity:1;transform:scale(1)}50%{opacity:.4;transform:scale(1.4)}}
+    .feed-list{max-height:190px;overflow-y:auto;padding:6px;}
+    .feed-item{display:flex;align-items:flex-start;gap:8px;padding:7px 9px;border-radius:7px;
+      font-size:11px;line-height:1.5;margin-bottom:2px;animation:si .25s ease;}
+    @keyframes si{from{opacity:0;transform:translateX(12px)}to{opacity:1;transform:none}}
+    .feed-item.cookie{background:rgba(245,158,11,.08);}
+    .feed-item.track{background:rgba(124,58,237,.08);}
+    .feed-item.action{background:rgba(16,185,129,.08);}
+    .feed-item.fingerprint{background:rgba(239,68,68,.08);}
+    .feed-item.pixel{background:rgba(59,130,246,.08);}
+    .feed-item.privacy{background:rgba(16,185,129,.08);}
+    .feed-icon{font-size:13px;flex-shrink:0;margin-top:1px;}
+    .feed-time{font-family:var(--font-m);font-size:9px;color:var(--muted);}
+    .feed-footer{padding:9px 16px;border-top:1px solid var(--border);
+      display:flex;justify-content:space-between;align-items:center;}
+    .feed-footer a{font-size:11px;font-weight:700;color:var(--accent2);text-decoration:none;}
+    .feed-count{font-family:var(--font-m);font-size:10px;color:var(--muted);}
+
+    /* COOKIE BANNER */
+    #banner{position:fixed;bottom:0;left:0;right:0;z-index:400;
+      background:rgba(18,18,28,.97);backdrop-filter:blur(20px);
+      border-top:1px solid var(--border);padding:24px 48px;
+      display:flex;align-items:center;gap:28px;
+      box-shadow:0 -20px 80px rgba(0,0,0,.5);transition:transform .4s ease;}
+    #banner.hidden{transform:translateY(100%);pointer-events:none;}
+    .banner-icon{font-size:36px;flex-shrink:0;}
+    .banner-text{flex:1;}
+    .banner-text h3{font-family:var(--font-d);font-size:20px;font-weight:700;margin-bottom:6px;}
+    .banner-text p{font-size:13px;color:var(--muted2);line-height:1.6;max-width:560px;}
+    .banner-text p strong{color:var(--text);}
+    .banner-text .hint{font-size:11px;color:var(--accent);margin-top:6px;display:block;}
+    .banner-btns{display:flex;gap:10px;flex-shrink:0;}
+    .bbtn{padding:11px 24px;border-radius:9px;font-size:13px;font-weight:700;
+      cursor:pointer;font-family:var(--font-b);transition:all .2s;}
+    .bbtn.accept{background:linear-gradient(135deg,var(--green),#059669);color:#fff;border:none;}
+    .bbtn.accept:hover{transform:translateY(-2px);box-shadow:0 8px 24px rgba(16,185,129,.4);}
+    .bbtn.essential{background:var(--surface2);color:var(--text);border:1px solid var(--border);}
+    .bbtn.essential:hover{border-color:var(--yellow);color:var(--yellow);}
+    .bbtn.refuse{background:transparent;color:var(--muted2);border:1px solid var(--border);}
+    .bbtn.refuse:hover{border-color:var(--red);color:var(--red);}
+
+    /* PRIVACY MODE TOGGLE */
+    #privacy-mode-bar{display:none;padding:10px 48px;background:rgba(16,185,129,.08);
+      border-bottom:1px solid rgba(16,185,129,.2);align-items:center;gap:14px;font-size:13px;}
+    #privacy-mode-bar.shown{display:flex;}
+    #privacy-mode-bar strong{color:var(--green);}
+    #privacy-mode-bar span{color:var(--muted2);}
+
+    footer{padding:40px 48px;border-top:1px solid var(--border);
+      display:flex;align-items:center;justify-content:space-between;color:var(--muted);font-size:12px;}
+    .footer-logo{font-family:var(--font-d);font-size:18px;font-weight:900;color:var(--muted);}
+
+    ::-webkit-scrollbar{width:4px;}
+    ::-webkit-scrollbar-track{background:transparent;}
+    ::-webkit-scrollbar-thumb{background:var(--border);border-radius:2px;}
+  </style>
+</head>
+<body>
+
+<!-- NAV -->
+<nav>
+  <div class="logo">ShopNova</div>
+  <div class="nav-links">
+    <a href="#">Accueil</a><a href="#products">Produits</a><a href="#">Offres</a>
+  </div>
+  <div class="nav-right">
+    <a class="nav-btn compare" href="compare.html" target="_blank">⚖ Avant / Après</a>
+    <a class="nav-btn dash" href="dashboard.html" target="_blank">🔬 Tableau de bord</a>
+  </div>
+</nav>
+
+<!-- MODE PRIVÉE -->
+<div id="privacy-mode-bar">
+  🛡 <strong>Mode vie privée actif</strong>
+  <span>Aucun cookie de suivi, aucun pixel, aucun profilage. Votre session est anonyme.</span>
+  <button onclick="disablePrivacyMode()" style="margin-left:auto;padding:5px 14px;border-radius:6px;
+    background:transparent;border:1px solid var(--green);color:var(--green);cursor:pointer;
+    font-size:11px;font-weight:700;font-family:var(--font-b);">Désactiver</button>
+</div>
+
+<!-- CONSENT STRIP -->
+<div id="consent-strip">
+  <span id="strip-icon"></span>
+  <span id="strip-text"></span>
+  <a href="dashboard.html" target="_blank">Voir mes données →</a>
+</div>
+
+<!-- PIXEL RADAR -->
+<div id="pixel-radar">
+  <div class="radar-header">
+    <div class="radar-title">📡 Pixel de suivi (1×1px)</div>
+    <button class="radar-close" onclick="document.getElementById('pixel-radar').classList.remove('open')">×</button>
+  </div>
+  <div class="radar-pixel-area">
+    <div class="pixel-visual">
+      <div class="pixel-dot" id="pixel-dot"></div>
+    </div>
+    <div class="pixel-info">
+      <strong>Image invisible 1×1px</strong>
+      Déclenché automatiquement.<br>
+      Aucun clic requis. Vous ne le voyez pas.
+    </div>
+  </div>
+  <div class="radar-log" id="radar-log">
+    <div style="font-size:10px;color:var(--muted);padding:4px;">En attente de déclenchement…</div>
+  </div>
+</div>
+
+<!-- HERO -->
+<section class="hero">
+  <div>
+    <div class="hero-badge">✦ Nouvelle collection 2025</div>
+    <h1>Shopping<br><span>Premium</span><br>Redéfini.</h1>
+    <p>Une expérience d'achat haut de gamme — mais à quel prix pour votre vie privée ? Chaque interaction est observée dans cette démonstration.</p>
+    <div class="hero-btns">
+      <button class="btn-primary" onclick="document.getElementById('products').scrollIntoView({behavior:'smooth'})">Explorer</button>
+      <button class="btn-ghost" onclick="window.open('dashboard.html','_blank')">Mes données →</button>
+    </div>
+  </div>
+  <div class="hero-visual">
+    <div class="mini-card"><div class="mini-emoji">👟</div><div class="mini-name">Air Runner X</div><div class="mini-price">189$</div></div>
+    <div class="mini-card"><div class="mini-emoji">🎧</div><div class="mini-name">SoundPro Max</div><div class="mini-price">349$</div></div>
+    <div class="mini-card"><div class="mini-emoji">⌚</div><div class="mini-name">SmartWatch S9</div><div class="mini-price">499$</div></div>
+    <div class="mini-card"><div class="mini-emoji">📱</div><div class="mini-name">PhoneUltra 15</div><div class="mini-price">1299$</div></div>
+    <div class="mini-card"><div class="mini-emoji">💻</div><div class="mini-name">ProBook Air</div><div class="mini-price">2199$</div></div>
+    <div class="mini-card"><div class="mini-emoji">🕶</div><div class="mini-name">VisionAR Pro</div><div class="mini-price">899$</div></div>
+  </div>
+</section>
+
+<!-- PRODUITS -->
+<section class="section" id="products">
+  <div class="section-header">
+    <h2>Produits populaires</h2>
+    <p>Chaque clic est enregistré. Chaque produit consulté enrichit votre profil.</p>
+  </div>
+  <div class="products-grid" id="products-grid"></div>
+</section>
+
+<!-- FLUX D'ACTIVITÉ -->
+<div id="feed">
+  <div class="feed-header">
+    <div class="feed-title"><span class="pulsedot"></span>Activité de suivi</div>
+    <span style="font-size:10px;color:var(--muted);">100% LOCAL</span>
+  </div>
+  <div class="feed-list" id="feed-list"></div>
+  <div class="feed-footer">
+    <a href="dashboard.html" target="_blank">→ Tableau de bord</a>
+    <span class="feed-count" id="feed-count">0 événements</span>
+  </div>
+</div>
+
+<!-- COOKIE BANNER -->
+<div id="banner">
+  <div class="banner-icon">🍪</div>
+  <div class="banner-text">
+    <h3>Nous utilisons des cookies</h3>
+    <p>ShopNova souhaite créer des cookies pour <strong>analyser votre comportement</strong>,
+      vous <strong>identifier de façon persistante</strong> et vous afficher des
+      <strong>publicités personnalisées</strong>. Votre choix aura un impact mesurable.</p>
+    <span class="hint">→ Ouvrez le tableau de bord pour voir exactement ce qui se passe lors de votre choix.</span>
+  </div>
+  <div class="banner-btns">
+    <button class="bbtn refuse" onclick="choose('refused')">Refuser</button>
+    <button class="bbtn essential" onclick="choose('essential')">Essentiels</button>
+    <button class="bbtn accept" onclick="choose('all')">Tout accepter ✓</button>
+  </div>
+</div>
+
+<footer>
+  <div class="footer-logo">ShopNova</div>
+  <div>Démonstration éducative — Projet pratique 1</div>
+  <div>⚠ Aucune donnée envoyée à l'extérieur</div>
+</footer>
+
+<script src="engine.js"></script>
+<script>
+
+//  PAGE LOGIC
+
+
+const PRODUCTS = [
+  {id:1,emoji:'👟',name:'Air Runner X Pro',cat:'Chaussures',desc:'Confort extrême, amorti réactif.',price:189},
+  {id:2,emoji:'🎧',name:'SoundPro Max 3',cat:'Audio',desc:'Réduction de bruit active, 40h.',price:349},
+  {id:3,emoji:'⌚',name:'SmartWatch Series 9',cat:'Montres',desc:'Santé, sport, notifications.',price:499},
+  {id:4,emoji:'📱',name:'PhoneUltra 15',cat:'Téléphones',desc:'Appareil photo professionnel.',price:1299},
+  {id:5,emoji:'💻',name:'ProBook Air M4',cat:'Ordinateurs',desc:'Ultraléger, ultrarapide.',price:2199},
+  {id:6,emoji:'🕶',name:'VisionAR Explorer',cat:'AR/VR',desc:'Réalité augmentée immersive.',price:899},
+  {id:7,emoji:'🎮',name:'GamePad Pro Elite',cat:'Gaming',desc:'Précision pro, grip ergonomique.',price:129},
+  {id:8,emoji:'📷',name:'SnapMaster 6K',cat:'Photo',desc:'Capteur 6K, stabilisation 5 axes.',price:1899},
+];
+
+let privacyMode = false;
+
+// Feed
+const ICONS = {cookie_set:'🍪',consent:'✅',session:'🔑',fingerprint:'🔍',
+  pixel:'📡',analytics:'📊',behavior:'👁',privacy:'🛡',cookie_del:'🗑',default:'⚡'};
+
+ENGINE.onLog(entry => {
+  const feed = document.getElementById('feed');
+  const list = document.getElementById('feed-list');
+  feed.classList.add('open');
+
+  const el = document.createElement('div');
+  el.className = `feed-item ${entry.category}`;
+  el.innerHTML = `
+    <span class="feed-icon">${ICONS[entry.type]||ICONS.default}</span>
+    <div>
+      <div>${entry.message}</div>
+      <div class="feed-time">${new Date(entry.timestamp).toLocaleTimeString('fr-CA',{hour12:false})}</div>
+    </div>`;
+  list.insertBefore(el, list.firstChild);
+  if (list.children.length > 12) list.removeChild(list.lastChild);
+
+  document.getElementById('feed-count').textContent = ENGINE.getLogs().length + ' événements';
+});
+
+// Pixel radar
+ENGINE.onLog(entry => {
+  if (entry.type !== 'pixel') return;
+  const radar = document.getElementById('pixel-radar');
+  radar.classList.add('open');
+
+  const dot = document.getElementById('pixel-dot');
+  dot.classList.remove('firing');
+  void dot.offsetWidth; // reflow
+  dot.classList.add('firing');
+
+  const log = document.getElementById('radar-log');
+  const e = document.createElement('div');
+  e.className = 'radar-entry';
+  const d = entry.data || {};
+  e.innerHTML = `<span class="ev">EVENT: ${d.event||'—'}</span>
+    <span class="ts">${new Date(entry.timestamp).toLocaleTimeString('fr-CA',{hour12:false})}</span><br>
+    userId: ${(d.userId||'anon').substring(0,18)} | page: ${d.page||'/'}<br>
+    viewport: ${d.viewport||'—'} | ref: ${(d.referrer||'direct').substring(0,20)}`;
+  log.insertBefore(e, log.firstChild);
+  if (log.children.length > 8) log.removeChild(log.lastChild);
+});
+
+// Choix de consentement
+function choose(choice) {
+  document.getElementById('banner').classList.add('hidden');
+  ENGINE.applyConsent(choice);
+  updateConsentStrip(choice);
+
+  if (choice === 'all') {
+    ENGINE.firePixel('page_load', { productCount: PRODUCTS.length });
+    enableScrollTracking();
+  }
+
+  if (choice === 'refused') {
+    showPrivacyMode();
+  }
+}
+
+function updateConsentStrip(choice) {
+  const strip = document.getElementById('consent-strip');
+  const icon  = document.getElementById('strip-icon');
+  const text  = document.getElementById('strip-text');
+  strip.className = 'shown ' + choice;
+  const map = {
+    all:      ['✅','Tout accepté — 6 cookies créés, empreinte collectée, suivi comportemental actif'],
+    essential:['⚠️','Essentiels seulement — 3 cookies de session uniquement, pas de profilage'],
+    refused:  ['🛡','Refusé — 1 cookie de refus uniquement, aucun tracking'],
+  };
+  icon.textContent = map[choice][0];
+  text.textContent = map[choice][1];
+}
+
+// mode privée
+function showPrivacyMode() {
+  privacyMode = true;
+  document.getElementById('privacy-mode-bar').classList.add('shown');
+}
+function disablePrivacyMode() {
+  privacyMode = false;
+  document.getElementById('privacy-mode-bar').classList.remove('shown');
+  ENGINE.log('privacy','Mode vie privée désactivé par l\'utilisateur',{},'action');
+}
+
+// tracking de défilement
+const scrollBuckets = new Set();
+function enableScrollTracking() {
+  window.addEventListener('scroll', () => {
+    const pct = Math.round(window.scrollY / (document.body.scrollHeight - window.innerHeight) * 100);
+    const b = Math.floor(pct / 25) * 25;
+    if (b > 0 && !scrollBuckets.has(b)) {
+      scrollBuckets.add(b);
+      ENGINE.log('behavior', `Défilement ${b}% de la page atteint`, {depth:b}, 'track');
+    }
+  }, {passive:true});
+}
+
+// interactions produits
+function viewProduct(id, name, price) {
+  const consent = ENGINE.getConsent();
+  ENGINE.log('behavior', `Produit consulté : ${name}`, {productId:id,name,price}, 'action');
+  if (consent?.choice === 'all') {
+    ENGINE.firePixel('product_view', {productId:id,name,price});
+    const p = ENGINE.getProfile() || {};
+    const viewed = p.viewedProducts || [];
+    if (!viewed.includes(name)) viewed.push(name);
+    ENGINE.updateProfile({viewedProducts: viewed, lastProductPrice: price});
+  }
+}
+
+function addToCart(id, name, price) {
+  ENGINE.log('action', `Ajout au panier : ${name} (${price}$)`, {productId:id,name,price}, 'action');
+  const consent = ENGINE.getConsent();
+  if (consent?.choice === 'all') {
+    ENGINE.firePixel('add_to_cart', {productId:id,name,price,currency:'CAD'});
+    const p = ENGINE.getProfile() || {};
+    const cart = p.cartItems || [];
+    cart.push({name, price, addedAt: new Date().toISOString()});
+    const budget = cart.reduce((s,i) => s + i.price, 0);
+    ENGINE.updateProfile({cartItems: cart, estimatedBudget: budget});
+    ENGINE.log('analytics', `Budget estimé mis à jour : ${budget}$`, {budget}, 'track');
+  }
+}
+
+// Rendu des produits
+function renderProducts() {
+  const grid = document.getElementById('products-grid');
+  grid.innerHTML = PRODUCTS.map(p => `
+    <div class="product-card" onclick="viewProduct(${p.id},'${p.name}',${p.price})">
+      <div class="img-area">${p.emoji}</div>
+      <div class="info">
+        <div class="cat">${p.cat}</div>
+        <div class="pname">${p.name}</div>
+        <div class="pdesc">${p.desc}</div>
+        <div class="pbottom">
+          <span class="pprice">${p.price}$</span>
+          <button class="btn-add" onclick="event.stopPropagation();addToCart(${p.id},'${p.name}',${p.price})">+ Panier</button>
+        </div>
+      </div>
+    </div>`).join('');
+}
+
+// Initialisation de la page
+(function init() {
+  renderProducts();
+  ENGINE.getSession();
+  ENGINE.log('session', 'Page chargée — bannière cookies affichée', {
+    cookiesBeforeConsent: document.cookie || '(aucun)',
+    localStorageBefore: localStorage.length + ' entrées',
+  }, 'action');
+
+  const existing = ENGINE.getConsent();
+  if (existing) {
+    document.getElementById('banner').classList.add('hidden');
+    updateConsentStrip(existing.choice);
+    ENGINE.log('session', `Retour visiteur — consentement mémorisé : "${existing.choice}"`, {
+      choiceDate: existing.timestamp,
+      userId: ENGINE.getCookie('shopnova_user_id') || 'N/A',
+    }, 'action');
+    if (existing.choice === 'all') enableScrollTracking();
+    if (existing.choice === 'refused') showPrivacyMode();
+    ENGINE.recordVisit();
+  }
+
+  document.getElementById('feed-count').textContent = ENGINE.getLogs().length + ' événements';
+})();
+</script>
+</body>
+</html>

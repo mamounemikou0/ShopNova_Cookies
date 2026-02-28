@@ -1,0 +1,416 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+  <meta charset="UTF-8"/>
+  <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+  <title>ShopNova — Comparaison Avant / Après</title>
+  <style>
+    :root{
+      --bg:#060609;--surface:#0e0e1a;--surface2:#14142a;--surface3:#1c1c38;
+      --border:#242448;--accent:#ff6b35;--accent2:#7c3aed;
+      --green:#10b981;--red:#ef4444;--yellow:#f59e0b;--blue:#3b82f6;
+      --text:#e8e8f4;--muted:#50507a;--muted2:#8080aa;
+      --font-d:'Georgia','Times New Roman',serif;--font-b:-apple-system,BlinkMacSystemFont,'Segoe UI',sans-serif;--font-m:'SF Mono','Fira Code','Consolas',monospace;
+    }
+    *{margin:0;padding:0;box-sizing:border-box;}
+    body{font-family:var(--font-b);background:var(--bg);color:var(--text);min-height:100vh;}
+
+    header{display:flex;align-items:center;justify-content:space-between;
+      padding:16px 36px;background:var(--surface);border-bottom:1px solid var(--border);}
+    .logo{font-family:var(--font-d);font-size:22px;font-weight:900;
+      background:linear-gradient(135deg,var(--accent),var(--accent2));
+      -webkit-background-clip:text;-webkit-text-fill-color:transparent;}
+    .htitle{font-size:13px;color:var(--muted2);margin-left:14px;}
+    .hleft{display:flex;align-items:center;}
+    .hright{display:flex;gap:10px;}
+    .hbtn{padding:7px 16px;border-radius:8px;font-size:12px;font-weight:700;cursor:pointer;
+      font-family:var(--font-b);text-decoration:none;display:inline-flex;align-items:center;gap:6px;
+      transition:all .2s;border:none;background:var(--surface2);border:1px solid var(--border);color:var(--text);}
+
+    /* HERO */
+    .hero{text-align:center;padding:48px 36px 32px;}
+    .hero h1{font-family:var(--font-d);font-size:42px;font-weight:900;margin-bottom:12px;}
+    .hero h1 span{background:linear-gradient(135deg,var(--accent),var(--accent2));
+      -webkit-background-clip:text;-webkit-text-fill-color:transparent;}
+    .hero p{color:var(--muted2);font-size:15px;max-width:600px;margin:0 auto 32px;line-height:1.7;}
+
+    /* Status courant */
+    .current-status{
+      display:flex;align-items:center;justify-content:center;gap:12px;
+      padding:14px 32px;border-radius:14px;margin:0 36px 32px;
+      background:var(--surface);border:1px solid var(--border);font-size:14px;font-weight:600;
+    }
+    .cs-dot{width:12px;height:12px;border-radius:50%;flex-shrink:0;}
+    .cs-dot.all{background:var(--green);box-shadow:0 0 10px rgba(16,185,129,.6);}
+    .cs-dot.essential{background:var(--yellow);box-shadow:0 0 10px rgba(245,158,11,.6);}
+    .cs-dot.refused{background:var(--red);box-shadow:0 0 10px rgba(239,68,68,.6);}
+    .cs-dot.none{background:var(--muted);}
+
+    /* Grille de comparaison */
+    .compare{display:grid;grid-template-columns:repeat(3,1fr);gap:20px;padding:0 36px 36px;}
+    .col{background:var(--surface);border:1px solid var(--border);border-radius:20px;overflow:hidden;
+      transition:border-color .3s;}
+    .col.active-col{border-color:var(--accent2);box-shadow:0 0 40px rgba(124,58,237,.15);}
+
+    .col-header{padding:20px 22px;border-bottom:1px solid var(--border);}
+    .col-header h2{font-size:18px;font-weight:800;margin-bottom:4px;}
+    .col-badge{display:inline-flex;align-items:center;gap:6px;padding:4px 12px;border-radius:100px;
+      font-size:11px;font-weight:700;margin-bottom:10px;}
+    .col-badge.all{background:rgba(16,185,129,.15);color:var(--green);}
+    .col-badge.essential{background:rgba(245,158,11,.15);color:var(--yellow);}
+    .col-badge.refused{background:rgba(239,68,68,.15);color:var(--red);}
+    .col-desc{font-size:12px;color:var(--muted2);line-height:1.6;}
+
+    /* RISK */
+    .risk-section{padding:16px 22px;border-bottom:1px solid var(--border);}
+    .risk-label-row{display:flex;justify-content:space-between;font-size:12px;margin-bottom:6px;font-weight:600;}
+    .risk-bar-outer{background:var(--surface2);border-radius:8px;height:10px;overflow:hidden;}
+    .risk-bar-inner{height:100%;border-radius:8px;transition:width 1s ease;}
+
+    /* Donnees */
+    .data-section{padding:16px 22px;border-bottom:1px solid var(--border);}
+    .data-section h3{font-size:11px;font-weight:700;color:var(--muted);text-transform:uppercase;
+      letter-spacing:.08em;margin-bottom:10px;}
+    .data-item{display:flex;align-items:flex-start;gap:8px;margin-bottom:8px;font-size:12px;line-height:1.5;}
+    .data-icon{font-size:13px;flex-shrink:0;width:18px;}
+    .data-text{color:var(--text);}
+    .data-text.dim{color:var(--muted);}
+    .data-sub{font-size:10px;color:var(--muted2);margin-top:1px;font-style:italic;}
+
+    /* Donnees en live  */
+    .live-section{padding:16px 22px;background:var(--surface2);}
+    .live-section h3{font-size:11px;font-weight:700;color:var(--muted);text-transform:uppercase;
+      letter-spacing:.08em;margin-bottom:10px;display:flex;align-items:center;gap:6px;}
+    .live-dot{width:6px;height:6px;border-radius:50%;background:var(--green);animation:pd 1.4s infinite;}
+    @keyframes pd{0%,100%{opacity:1}50%{opacity:.3}}
+    .live-kv{display:flex;justify-content:space-between;padding:4px 0;border-bottom:1px solid var(--border);font-size:11px;}
+    .live-kv:last-child{border-bottom:none;}
+    .live-k{color:var(--muted2);}
+    .live-v{font-family:var(--font-m);font-size:10px;color:var(--text);text-align:right;max-width:140px;word-break:break-all;}
+    .live-v.green{color:var(--green);}
+    .live-v.red{color:var(--red);}
+    .live-v.yellow{color:var(--yellow);}
+
+    /* CONCLUSION */
+    .conclusion{margin:0 36px 36px;background:var(--surface);border:1px solid var(--border);
+      border-radius:16px;overflow:hidden;}
+    .conclusion-header{padding:16px 24px;background:var(--surface2);border-bottom:1px solid var(--border);}
+    .conclusion-header h2{font-size:16px;font-weight:700;}
+    .conclusion-body{padding:20px 24px;display:grid;grid-template-columns:repeat(3,1fr);gap:16px;}
+    .conc-box{background:var(--surface2);border-radius:10px;padding:14px;border:1px solid var(--border);}
+    .conc-box h4{font-size:12px;font-weight:700;margin-bottom:8px;}
+    .conc-box p{font-size:11px;color:var(--muted2);line-height:1.7;}
+
+    ::-webkit-scrollbar{width:4px;}
+    ::-webkit-scrollbar-track{background:transparent;}
+    ::-webkit-scrollbar-thumb{background:var(--border);border-radius:2px;}
+  </style>
+</head>
+<body>
+
+<header>
+  <div class="hleft">
+    <div class="logo">ShopNova</div>
+    <div class="htitle">/ Comparaison Avant — Après consentement</div>
+  </div>
+  <div class="hright">
+    <a class="hbtn" href="dashboard.html">🔬 Tableau de bord</a>
+    <a class="hbtn" href="index.html">← Retour au site</a>
+  </div>
+</header>
+
+<div class="hero">
+  <h1>Que se passe-t-il <span>exactement</span> ?</h1>
+  <p>Cette page compare côte à côte les 3 scénarios de consentement. La colonne surlignée correspond à votre choix actuel, avec vos données réelles en temps réel.</p>
+</div>
+
+<div class="current-status" id="current-status">
+  <span class="cs-dot none" id="cs-dot"></span>
+  <span id="cs-text">Chargement…</span>
+</div>
+
+<div class="compare">
+
+  <!-- COL: TOUT ACCEPTER -->
+  <div class="col" id="col-all">
+    <div class="col-header">
+      <div class="col-badge all">✅ Tout accepter</div>
+      <h2 style="color:var(--green)">Consentement total</h2>
+      <p class="col-desc">Vous autorisez la collecte de données analytiques, marketing et comportementales.</p>
+    </div>
+
+    <div class="risk-section">
+      <div class="risk-label-row">
+        <span>Niveau de risque</span>
+        <span style="color:var(--red);font-weight:800;">ÉLEVÉ</span>
+      </div>
+      <div class="risk-bar-outer">
+        <div class="risk-bar-inner" style="width:92%;background:linear-gradient(90deg,var(--yellow),var(--red));"></div>
+      </div>
+    </div>
+
+    <div class="data-section">
+      <h3>🍪 Cookies créés</h3>
+      <div class="data-item"><span class="data-icon">🟡</span><div>
+        <div class="data-text">shopnova_session_id</div>
+        <div class="data-sub">Essentiel — 1 jour</div>
+      </div></div>
+      <div class="data-item"><span class="data-icon">🟡</span><div>
+        <div class="data-text">shopnova_consent</div>
+        <div class="data-sub">Essentiel — 1 an</div>
+      </div></div>
+      <div class="data-item"><span class="data-icon">🟡</span><div>
+        <div class="data-text">shopnova_lang</div>
+        <div class="data-sub">Essentiel — 1 an</div>
+      </div></div>
+      <div class="data-item"><span class="data-icon">🔴</span><div>
+        <div class="data-text">shopnova_user_id</div>
+        <div class="data-sub">⚠ Tracking — <strong>2 ANS</strong></div>
+      </div></div>
+      <div class="data-item"><span class="data-icon">🔴</span><div>
+        <div class="data-text">shopnova_ab_group</div>
+        <div class="data-sub">⚠ Manipulation prix/affichage — 1 an</div>
+      </div></div>
+      <div class="data-item"><span class="data-icon">🔴</span><div>
+        <div class="data-text">shopnova_first_visit</div>
+        <div class="data-sub">⚠ Horodatage première visite — 2 ans</div>
+      </div></div>
+    </div>
+
+    <div class="data-section">
+      <h3>📡 Tracking activé</h3>
+      <div class="data-item"><span class="data-icon">📡</span><div>
+        <div class="data-text">Pixel 1×1px déclenché</div>
+        <div class="data-sub">pageview, product_view, add_to_cart…</div>
+      </div></div>
+      <div class="data-item"><span class="data-icon">🔍</span><div>
+        <div class="data-text">Empreinte navigateur</div>
+        <div class="data-sub">langue, résolution, CPU, RAM, fuseau…</div>
+      </div></div>
+      <div class="data-item"><span class="data-icon">👁</span><div>
+        <div class="data-text">Suivi comportemental</div>
+        <div class="data-sub">scroll, produits vus, budget panier</div>
+      </div></div>
+    </div>
+
+    <div class="live-section" id="live-all">
+      <h3><span class="live-dot"></span>Données réelles (votre session)</h3>
+      <div id="live-all-content">
+        <div class="live-kv"><span class="live-k">Statut</span><span class="live-v">—</span></div>
+      </div>
+    </div>
+  </div>
+
+  <!-- ESSENTIELS -->
+  <div class="col" id="col-essential">
+    <div class="col-header">
+      <div class="col-badge essential">⚠️ Essentiels seulement</div>
+      <h2 style="color:var(--yellow)">Consentement partiel</h2>
+      <p class="col-desc">Seuls les cookies nécessaires au fonctionnement du site sont créés.</p>
+    </div>
+
+    <div class="risk-section">
+      <div class="risk-label-row">
+        <span>Niveau de risque</span>
+        <span style="color:var(--yellow);font-weight:800;">MODÉRÉ</span>
+      </div>
+      <div class="risk-bar-outer">
+        <div class="risk-bar-inner" style="width:38%;background:linear-gradient(90deg,var(--green),var(--yellow));"></div>
+      </div>
+    </div>
+
+    <div class="data-section">
+      <h3>🍪 Cookies créés</h3>
+      <div class="data-item"><span class="data-icon">🟡</span><div>
+        <div class="data-text">shopnova_session_id</div>
+        <div class="data-sub">Essentiel — 1 jour</div>
+      </div></div>
+      <div class="data-item"><span class="data-icon">🟡</span><div>
+        <div class="data-text">shopnova_consent</div>
+        <div class="data-sub">Essentiel — 1 an</div>
+      </div></div>
+      <div class="data-item"><span class="data-icon">🟡</span><div>
+        <div class="data-text">shopnova_lang</div>
+        <div class="data-sub">Essentiel — 1 an</div>
+      </div></div>
+      <div class="data-item"><span class="data-icon" style="color:var(--muted)">✗</span>
+        <div class="data-text dim">Pas d'identifiant persistant</div>
+      </div>
+      <div class="data-item"><span class="data-icon" style="color:var(--muted)">✗</span>
+        <div class="data-text dim">Pas de cookie A/B</div>
+      </div>
+      <div class="data-item"><span class="data-icon" style="color:var(--muted)">✗</span>
+        <div class="data-text dim">Pas de date première visite</div>
+      </div>
+    </div>
+
+    <div class="data-section">
+      <h3>📡 Tracking</h3>
+      <div class="data-item"><span class="data-icon" style="color:var(--muted)">✗</span>
+        <div class="data-text dim">Aucun pixel déclenché</div>
+      </div>
+      <div class="data-item"><span class="data-icon" style="color:var(--muted)">✗</span>
+        <div class="data-text dim">Aucune empreinte navigateur</div>
+      </div>
+      <div class="data-item"><span class="data-icon" style="color:var(--muted)">✗</span>
+        <div class="data-text dim">Aucun suivi comportemental</div>
+      </div>
+    </div>
+
+    <div class="live-section" id="live-essential">
+      <h3><span class="live-dot"></span>Données réelles (votre session)</h3>
+      <div id="live-essential-content">
+        <div class="live-kv"><span class="live-k">Statut</span><span class="live-v">—</span></div>
+      </div>
+    </div>
+  </div>
+
+  <!-- REFUSER -->
+  <div class="col" id="col-refused">
+    <div class="col-header">
+      <div class="col-badge refused">🛡 Tout refuser</div>
+      <h2 style="color:var(--red)">Consentement refusé</h2>
+      <p class="col-desc">Seul un cookie mémorisant votre refus est créé. Aucun tracking possible.</p>
+    </div>
+
+    <div class="risk-section">
+      <div class="risk-label-row">
+        <span>Niveau de risque</span>
+        <span style="color:var(--green);font-weight:800;">FAIBLE</span>
+      </div>
+      <div class="risk-bar-outer">
+        <div class="risk-bar-inner" style="width:8%;background:var(--green);"></div>
+      </div>
+    </div>
+
+    <div class="data-section">
+      <h3>🍪 Cookies créés</h3>
+      <div class="data-item"><span class="data-icon">🔴</span><div>
+        <div class="data-text">shopnova_consent = "refused"</div>
+        <div class="data-sub">Pour mémoriser le refus — 1 an</div>
+      </div></div>
+      <div class="data-item"><span class="data-icon" style="color:var(--muted)">✗</span>
+        <div class="data-text dim">Aucun autre cookie créé</div>
+      </div>
+      <div class="data-item"><span class="data-icon" style="color:var(--muted)">✗</span>
+        <div class="data-text dim">Tous les cookies de tracking supprimés</div>
+      </div>
+    </div>
+
+    <div class="data-section">
+      <h3>📡 Tracking</h3>
+      <div class="data-item"><span class="data-icon">✅</span>
+        <div class="data-text" style="color:var(--green);">Aucun pixel déclenché</div>
+      </div>
+      <div class="data-item"><span class="data-icon">✅</span>
+        <div class="data-text" style="color:var(--green);">Aucune empreinte navigateur</div>
+      </div>
+      <div class="data-item"><span class="data-icon">✅</span>
+        <div class="data-text" style="color:var(--green);">Aucun profilage possible</div>
+      </div>
+    </div>
+
+    <div class="live-section" id="live-refused">
+      <h3><span class="live-dot"></span>Données réelles (votre session)</h3>
+      <div id="live-refused-content">
+        <div class="live-kv"><span class="live-k">Statut</span><span class="live-v">—</span></div>
+      </div>
+    </div>
+  </div>
+
+</div>
+
+<!-- CONCLUSION -->
+<div class="conclusion">
+  <div class="conclusion-header">
+    <h2>📊 Conclusion — Ce que chaque choix révèle sur vous</h2>
+  </div>
+  <div class="conclusion-body">
+    <div class="conc-box" style="border-left:3px solid var(--red);">
+      <h4 style="color:var(--red);">🎯 Tout accepter : votre double numérique</h4>
+      <p>En acceptant tout, vous permettez la création d'un <strong>profil complet</strong> : qui vous êtes (langue, appareil), quand vous visitez, quoi vous regardez, combien vous pouvez dépenser, et dans quel groupe de test vous êtes placé pour manipuler votre expérience. Ce profil persiste <strong>2 ans</strong>.</p>
+    </div>
+    <div class="conc-box" style="border-left:3px solid var(--yellow);">
+      <h4 style="color:var(--yellow);">⚠️ Essentiels : anonyme mais tracé</h4>
+      <p>Votre session est fonctionnelle mais <strong>temporaire</strong>. À la fermeture du navigateur, vous n'êtes plus reconnu. Votre langue est mémorisée, mais aucun profil comportemental n'est construit. C'est le <strong>compromis raisonnable</strong>.</p>
+    </div>
+    <div class="conc-box" style="border-left:3px solid var(--green);">
+      <h4 style="color:var(--green);">🛡 Refuser : invisibilité maximale</h4>
+      <p>Vous n'existez pas pour le site à la prochaine visite. Aucun historique, aucun profil, aucune manipulation possible. C'est le seul choix qui <strong>respecte totalement votre vie privée</strong> et est conforme à la Loi 25 (Québec) et au RGPD.</p>
+    </div>
+  </div>
+</div>
+
+<script src="engine.js"></script>
+<script>
+function renderLive() {
+  const consent = ENGINE.getConsent();
+  const cookies = ENGINE.getAllShopCookies();
+  const fp = ENGINE.getFingerprint();
+  const profile = ENGINE.getProfile();
+  const logs = ENGINE.getLogs();
+  const pixels = ENGINE.getPixelLogs();
+
+  // status bar courrant
+  const csDot = document.getElementById('cs-dot');
+  const csText = document.getElementById('cs-text');
+  if (!consent) {
+    csDot.className='cs-dot none';
+    csText.textContent='Aucun choix effectué — Visitez le site et interagissez avec la bannière cookies.';
+  } else {
+    const map={all:{cls:'all',text:'Votre choix actuel : Tout accepter — 6 cookies, empreinte, pixels actifs'},
+      essential:{cls:'essential',text:'Votre choix actuel : Essentiels seulement — 3 cookies, pas de tracking'},
+      refused:{cls:'refused',text:'Votre choix actuel : Refusé — 1 cookie de refus, aucun tracking, vie privée maximale'}};
+    csDot.className='cs-dot '+(map[consent.choice]?.cls||'none');
+    csText.textContent=map[consent.choice]?.text||'';
+  }
+
+  // Highlight la colonne active
+  ['all','essential','refused'].forEach(c => {
+    const col = document.getElementById('col-'+c);
+    col.classList.toggle('active-col', consent?.choice===c);
+  });
+
+  // Donnees en temps reel
+  const cookieCount = cookies.length;
+  const pixelCount = pixels.length;
+  const choice = consent?.choice;
+
+  // toutes les colonnes en temps reel 
+  document.getElementById('live-all-content').innerHTML = choice==='all' ? `
+    <div class="live-kv"><span class="live-k">Statut</span><span class="live-v green">✅ ACTIF</span></div>
+    <div class="live-kv"><span class="live-k">Cookies créés</span><span class="live-v green">${cookieCount}</span></div>
+    <div class="live-kv"><span class="live-k">Pixels déclenchés</span><span class="live-v green">${pixelCount}</span></div>
+    <div class="live-kv"><span class="live-k">Empreinte</span><span class="live-v ${fp?'red':'yellow'}">${fp?'✅ collectée':'non collectée'}</span></div>
+    <div class="live-kv"><span class="live-k">user_id</span><span class="live-v" style="font-size:9px;">${ENGINE.getCookie('shopnova_user_id')||'—'}</span></div>
+    <div class="live-kv"><span class="live-k">Groupe A/B</span><span class="live-v">${ENGINE.getCookie('shopnova_ab_group')||'—'}</span></div>
+    ${profile?.estimatedBudget?`<div class="live-kv"><span class="live-k">Budget estimé</span><span class="live-v red">${profile.estimatedBudget}$</span></div>`:''}
+    <div class="live-kv"><span class="live-k">Événements</span><span class="live-v">${logs.length}</span></div>
+  ` : `<div class="live-kv"><span class="live-k">Statut</span><span class="live-v" style="color:var(--muted)">Non sélectionné</span></div>`;
+
+  // Colonne ESSENTIAL en temps réel
+  document.getElementById('live-essential-content').innerHTML = choice==='essential' ? `
+    <div class="live-kv"><span class="live-k">Statut</span><span class="live-v yellow">⚠️ ACTIF</span></div>
+    <div class="live-kv"><span class="live-k">Cookies créés</span><span class="live-v yellow">${cookieCount} (essentiels)</span></div>
+    <div class="live-kv"><span class="live-k">Pixels</span><span class="live-v green">✅ 0</span></div>
+    <div class="live-kv"><span class="live-k">Empreinte</span><span class="live-v green">✅ non collectée</span></div>
+    <div class="live-kv"><span class="live-k">user_id</span><span class="live-v green">✅ aucun</span></div>
+    <div class="live-kv"><span class="live-k">Événements</span><span class="live-v">${logs.length}</span></div>
+  ` : `<div class="live-kv"><span class="live-k">Statut</span><span class="live-v" style="color:var(--muted)">Non sélectionné</span></div>`;
+
+  // Colonne REFUSED en temps réel
+  document.getElementById('live-refused-content').innerHTML = choice==='refused' ? `
+    <div class="live-kv"><span class="live-k">Statut</span><span class="live-v red">🛡 ACTIF</span></div>
+    <div class="live-kv"><span class="live-k">Cookies créés</span><span class="live-v green">1 (refus seulement)</span></div>
+    <div class="live-kv"><span class="live-k">Pixels</span><span class="live-v green">✅ 0</span></div>
+    <div class="live-kv"><span class="live-k">Empreinte</span><span class="live-v green">✅ non collectée</span></div>
+    <div class="live-kv"><span class="live-k">Profilage</span><span class="live-v green">✅ impossible</span></div>
+    <div class="live-kv"><span class="live-k">Risque</span><span class="live-v green">✅ FAIBLE</span></div>
+  ` : `<div class="live-kv"><span class="live-k">Statut</span><span class="live-v" style="color:var(--muted)">Non sélectionné</span></div>`;
+}
+
+renderLive();
+setInterval(renderLive, 2000);
+</script>
+</body>
+</html>
