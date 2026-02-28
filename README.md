@@ -18,7 +18,7 @@ Projet réalisé par Elmamoune Mikou et Ayat Allah EL Anouar dans le cadre du co
 
 2.⁠ ⁠[Données observées](#-données-observées)   
 
-3.⁠ ⁠[Implications](#-implications)   
+3.⁠ ⁠[Implications](#implications)  
 
 4.⁠ ⁠[Installation et utilisation](#-installation-et-utilisation)
 
@@ -115,7 +115,7 @@ Tous les mécanismes sont implémentés en code natif, sans aucune librairie tie
 •⁠  ⁠*⁠ <img src="data:..."> ⁠ 1×1px* — simulation d'un pixel de tracking sans requête réseau réelle
 
 ---
-## Implications
+## ⚠️ Implications
 
 ### Ce que ces données permettraient dans un contexte réel
 
