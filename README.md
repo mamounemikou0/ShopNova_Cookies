@@ -1,7 +1,7 @@
 # 🍪 ShopNova — Démonstration de Consentement aux Cookies
 
-	⁠*Projet pratique 1 — Sécurité et vie privée numérique*  
-	⁠Application éducative qui rend *visible et compréhensible* ce qui se passe exactement lorsque vous interagissez avec une bannière de cookies.
+## Projet pratique 1 — Sécurité et vie privée numérique  
+⁠Application éducative qui rend visible et compréhensible ce qui se passe exactement lorsque vous interagissez avec une bannière de cookies.
 
 ---    
 
@@ -14,13 +14,20 @@ Projet réalisé par Elmamoune Mikou et Ayat Allah EL Anouar dans le cadre du co
 
 ## 📋 Table des matières
 
-1.⁠ ⁠[La menace étudiée](#-la-menace-étudiée)
-2.⁠ ⁠[Données observées](#-données-observées)
-3.⁠ ⁠[Implications](#-implications)
+1.⁠ ⁠[La menace étudiée](#-la-menace-étudiée)   
+
+2.⁠ ⁠[Données observées](#-données-observées)   
+
+3.⁠ ⁠[Implications](#-implications)   
+
 4.⁠ ⁠[Installation et utilisation](#-installation-et-utilisation)
+
 5.⁠ ⁠[Scénarios reproductibles](#-scénarios-reproductibles)
+
 6.⁠ ⁠[Architecture technique](#-architecture-technique)
+
 7.⁠ ⁠[Limites de la démonstration](#-limites-de-la-démonstration)
+
 8.⁠ ⁠[Analyse des risques et atténuation](#-analyse-des-risques-et-atténuation)
 
 ---
@@ -53,12 +60,12 @@ Un *cookie* est un petit fichier texte stocké localement dans votre navigateur 
 
 ### Chronologie exacte des événements
 
-
+<pre>
 ┌─────────────────────────────────────────────────────────────────┐
 │  VISITE DU SITE (avant tout choix)                              │
 │                                                                 │
-│  ① Session ID générée          → sessionStorage (onglet seul)  │
-│  ② Événement "bannière affichée" → localStorage (log)          │
+│  ① Session ID générée           → sessionStorage (onglet seul)  │
+│  ② Événement "bannière affichée" → localStorage (log)           │
 │  ③ Cookies existants : 0                                        │
 └──────────────────────────────┬──────────────────────────────────┘
                                │
@@ -75,8 +82,8 @@ Un *cookie* est un petit fichier texte stocké localement dans votre navigateur 
         0 pixel          0 pixel          📡 Pixel déclenché
         0 empreinte      0 empreinte      🔍 Empreinte collectée
         0 profil         0 profil         👁 Suivi comportemental
-
-
+</pre>
+		
 ### Quand chaque donnée est-elle collectée ?
 
 *Immédiatement au chargement de la page :*
@@ -108,8 +115,7 @@ Tous les mécanismes sont implémentés en code natif, sans aucune librairie tie
 •⁠  ⁠*⁠ <img src="data:..."> ⁠ 1×1px* — simulation d'un pixel de tracking sans requête réseau réelle
 
 ---
-
-## ⚠️ Implications
+## Implications
 
 ### Ce que ces données permettraient dans un contexte réel
 
@@ -147,7 +153,7 @@ Tous les mécanismes sont implémentés en code natif, sans aucune librairie tie
 ### Étape 1 — Cloner le dépôt
 
 ⁠ bash
-git clone https://github.com/VOTRE_EQUIPE/cookie-consent-demo.git
+git clone https://github.com/mamounemikou0/cookie-consent-demo.git
 cd cookie-consent-demo
  ⁠
 
