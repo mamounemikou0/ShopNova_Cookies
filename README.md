@@ -7,8 +7,13 @@
 
 ## 👥 Équipe
 
-Projet réalisé par Elmamoune Mikou et Ayat Allah EL Anouar dans le cadre du cours de Gestion de la cybersécurité/données personnelles — UQAC, hiver 2026.
+Projet réalisé par Elmamoune Mikou et Ayat Allah EL Anouar dans le cadre du cours de Gestion de la cybersécurité/données personnelles — UQAC, hiver 2026.   
 
+---   
+
+## Lien Démo du projet   
+
+https://uqac.ca.panopto.com/Panopto/Pages/Viewer.aspx?id=cc115055-e923-4a54-8897-b3ff014e157d
 
 ---    
 
