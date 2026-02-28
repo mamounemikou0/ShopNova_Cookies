@@ -157,11 +157,10 @@ Tous les mécanismes sont implémentés en code natif, sans aucune librairie tie
 
 ### Étape 1 — Cloner le dépôt
 
-⁠ bash
-git clone https://github.com/mamounemikou0/cookie-consent-demo.git
-cd cookie-consent-demo
- ⁠
-
+```bash
+git clone https://github.com/mamounemikou0/ShopNova_Cookies.git
+cd ShopNova_Cookies-main
+```
 ### Étape 2 — Lancer un serveur local
 
 *Option A — Python :*
